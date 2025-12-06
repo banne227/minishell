@@ -1,6 +1,6 @@
 #include stdbool.h
 
-bool is_valid_arg(char *arg)
+bool is_valid_identifier(char *arg)
 {
     int i;
 
@@ -39,7 +39,7 @@ void ft_unset(t_env *env, char **args)
     i = 1;
     while (args[i])
     {
-        if (is_valid_arg(args[i]) && env_exist(env, args[i]))
+        if (is_valid_identifier(args[i]) && env_exist(env, args[i]))
             env_remove(env, args[i]);
         i++;
     }
