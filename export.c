@@ -58,3 +58,44 @@ t_export extract_export(char *arg)
     }
     return (export);
 }
+
+void get_new_env(t_env *env, t_export export)
+{
+    if (env_exist(env, export.key))
+    {
+        if (export.type == EXPORT_SET)
+            env_update(env, export);
+        else if (export.type == EXPORT_APPEND)
+            env_append(env, export);
+    }
+    else
+        env_add(env, export);
+    free(export.key);
+    free(export.value);
+}
+
+int ft_export(t_env *env, char **args)
+{
+    int i;
+    t_export export;
+
+    i = 1;
+    if (!args[1])
+    {
+        print_sorted_env(env);
+        return (0);
+    }
+    while (args[i])
+    {
+        export = extract_export(args[i]);
+        if (export.type == EXPORT_INVALID)
+        {
+            fprintf(stderr, "export: `%s': not a valid identifier\n", args[i]);
+            i++;
+            return (1);
+        }
+        get_new_env(env, export);
+        i++;
+    }
+    return (0);
+}
