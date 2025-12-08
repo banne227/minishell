@@ -11,7 +11,9 @@ int get_env_size(t_env *env)
 void write_env_var(char *dest, t_export export, int len_key)
 {
     int len_value;
+    int i;
 
+    i = 0;
     if (export.value)
     {
         len_value = strlen(export.value);
@@ -26,6 +28,7 @@ void write_env_var(char *dest, t_export export, int len_key)
             dest[i] = export.value[i - len_key - 1];
             i++;
         }
+        dest[i] = '\0';
     }
     else
     {
@@ -35,6 +38,7 @@ void write_env_var(char *dest, t_export export, int len_key)
             dest[i] = export.key[i];
             i++;
         }
+        dest[i] = '\0';
     }
 }
 
@@ -81,7 +85,6 @@ char **env_remove(t_env *env, t_export export)
         return (env->envp);
     }
     copy_remove_env(env, new_envp, env_size, export);
-    new_envp[env_size] = NULL;
     return (new_envp);
 }
 
@@ -95,6 +98,5 @@ char **env_update(t_env *env, t_export export)
     if (!new_envp)
         return (0);
     copy_update_env(env, new_envp, env_size, export);
-    new_envp[env_size] = NULL;
     return (new_envp);
 }

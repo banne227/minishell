@@ -66,10 +66,8 @@ void get_new_env(t_env *env, t_export export)
         if (export.type == EXPORT_SET)
             env_update(env, export);
         else if (export.type == EXPORT_APPEND)
-            env_append(env, export);
+            env_add(env, export);
     }
-    else
-        env_add(env, export);
     free(export.key);
     free(export.value);
 }

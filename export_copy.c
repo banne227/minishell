@@ -1,4 +1,4 @@
-void env_copy(t_env *env, char **new_envp)
+void copy_env(t_env *env, char **new_envp)
 {
     int i;
 
@@ -29,6 +29,25 @@ void copy_update_env(t_env *env, char **new_envp, int env_size, t_export export)
             new_envp[i] = new_var;
         i++;
     }
+    new_envp[env_size] = NULL;
 }
 
-void copy_remove_env(t_env *env, char **new_envp, int env_size, t_export export)
+// void copy_remove_env(t_env *env, char **new_envp, int env_size, t_export export)
+// {
+//     int i;
+//     int j;
+
+//     j = 0;
+//     i = 0;
+//     while (i < env_size)
+//     {
+//         if (ft_strncmp(env->envp[i], export.key, strlen(export.key)) != 0 
+//                 || env->envp[i][strlen(export.key)] != '=')
+//         {
+//             new_envp[j] = ft_strdup(env->envp[i]);
+//             j++;
+//         }
+//         i++;
+//     }
+//     new_envp[j] = NULL;
+// }
