@@ -6,25 +6,11 @@
 /*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 11:33:46 by banne             #+#    #+#             */
-/*   Updated: 2025/12/09 16:21:49 by banne            ###   ########.fr       */
+/*   Updated: 2025/12/11 12:32:23 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-
-int	count_pipes(t_token *tokens)
-{
-	int	count;
-
-	count = 0;
-	while (tokens)
-	{
-		if (tokens->type == T_PIPE)
-			count++;
-		tokens = tokens->next;
-	}
-	return (count);
-}
 
 int	**init_pipes(int nbr_cmds)
 {
@@ -75,10 +61,12 @@ void	exec_cmd_pipe(t_cmd *cmd, int **pipe_fd, int cmd_i, t_data *minishell)
 
 void	fork_and_exec(pid_t *pids, int **pipe_fd, t_data *minishell)
 {
-	int	i;
+	int		i;
+	t_cmd	*current_cmd;
 
 	i = 0;
-	while (i < minishell->cmd_count)
+	current_cmd = minishell->cmds;
+	while (i < minishell->cmd_count && current_cmd)
 	{
 		pids[i] = fork();
 		if (pids[i] < 0)
@@ -87,7 +75,8 @@ void	fork_and_exec(pid_t *pids, int **pipe_fd, t_data *minishell)
 			exit(EXIT_FAILURE);
 		}
 		if (pids[i] == 0)
-			exec_cmd_pipe(&minishell->cmds[i], pipe_fd, i, minishell);
+			exec_cmd_pipe(current_cmd, pipe_fd, i, minishell);
+		current_cmd = current_cmd->next;
 		i++;
 	}
 }
@@ -110,8 +99,13 @@ void	pipe_execute(t_data *minishell)
 	i = 0;
 	fork_and_exec(pids, pipe_fd, minishell);
 	close_all_pipes(pipe_fd, minishell->cmd_count - 1, NULL);
-	while (i-- > 0)
+	while (i < minishell->cmd_count)
+	{
 		waitpid(pids[i], NULL, 0);
+		i++;
+	}
+	minishell->last_exit_status = 0;
+	free_all_pipes(pipe_fd, minishell->cmd_count - 1);
 	free(pids);
 }
 

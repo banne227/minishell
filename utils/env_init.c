@@ -6,11 +6,19 @@
 /*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 17:45:00 by banne             #+#    #+#             */
-/*   Updated: 2025/12/09 17:51:24 by banne            ###   ########.fr       */
+/*   Updated: 2025/12/11 13:42:31 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
+
+char	**free_env(char **envp, int i)
+{
+	while (--i >= 0)
+		free(envp[i]);
+	free(envp);
+	return (NULL);
+}
 
 char	**env_init(char **envp)
 {
@@ -31,12 +39,7 @@ char	**env_init(char **envp)
 	{
 		new_envp[i] = ft_strdup(envp[i]);
 		if (!new_envp[i])
-		{
-			while (--i >= 0)
-				free(new_envp[i]);
-			free(new_envp);
-			return (NULL);
-		}
+			return (free_env(new_envp, i));
 		i++;
 	}
 	new_envp[size] = NULL;

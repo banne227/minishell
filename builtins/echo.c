@@ -6,16 +6,30 @@
 /*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 14:36:30 by banne             #+#    #+#             */
-/*   Updated: 2025/12/09 13:30:54 by banne            ###   ########.fr       */
+/*   Updated: 2025/12/11 11:40:35 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-void	new_line(int newline)
+static void	new_line(int newline)
 {
 	if (newline)
 		printf("\n");
+}
+
+static void	print_echo_args(char **args, int start_index)
+{
+	int	i;
+
+	i = start_index;
+	while (args[i])
+	{
+		printf("%s", args[i]);
+		if (args[i + 1])
+			printf(" ");
+		i++;
+	}
 }
 
 void	ft_echo(char **args)
@@ -26,9 +40,9 @@ void	ft_echo(char **args)
 
 	i = 1;
 	need_newline = 1;
-	if (args[i] && args[i][0] == '-' && args[i][1] == 'n')
+	while (args[i] && args[i][0] == '-' && args[i][1] == 'n')
 	{
-		j = 1;
+		j = 2;
 		while (args[i][j] == 'n')
 			j++;
 		if (args[i][j] == '\0')
@@ -36,13 +50,9 @@ void	ft_echo(char **args)
 			need_newline = 0;
 			i += 1;
 		}
+		else
+			break ;
 	}
-	while (args[i])
-	{
-		printf("%s", args[i]);
-		if (args[i + 1])
-			printf(" ");
-		i++;
-	}
+	print_echo_args(args, i);
 	new_line(need_newline);
 }

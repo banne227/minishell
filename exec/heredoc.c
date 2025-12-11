@@ -6,7 +6,7 @@
 /*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 11:34:03 by banne             #+#    #+#             */
-/*   Updated: 2025/12/09 16:13:03 by banne            ###   ########.fr       */
+/*   Updated: 2025/12/11 12:33:21 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,6 @@ int	fill_here_doc(t_cmd *cmd, const char *limiter, int write_fd)
 	(void)cmd;
 	while (1)
 	{
-		//if (stop_signal())
-		//	return (-1);
 		line = readline("heredoc> ");
 		if (!line)
 			break ;

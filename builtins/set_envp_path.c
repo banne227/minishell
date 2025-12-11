@@ -6,7 +6,7 @@
 /*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 18:12:34 by banne             #+#    #+#             */
-/*   Updated: 2025/12/09 17:44:41 by banne            ###   ########.fr       */
+/*   Updated: 2025/12/11 11:39:35 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,11 +43,12 @@ char	*get_oldpwd_directory(t_env *env)
 char	*get_current_directory(void)
 {
 	char	*pwd;
+	char	*dup;
 
 	pwd = getcwd(NULL, 0);
 	if (pwd)
 	{
-		char	*dup = ft_strdup(pwd);
+		dup = ft_strdup(pwd);
 		free(pwd);
 		return (dup);
 	}
@@ -91,7 +92,13 @@ void	set_envp_paths(t_env *env)
 		free(env->oldpwd);
 	if (env->pwd)
 		free(env->pwd);
-	env->home = ft_strdup(temp_home);
-	env->oldpwd = ft_strdup(temp_oldpwd);
+	if (temp_home)
+		env->home = ft_strdup(temp_home);
+	else
+		env->home = NULL;
+	if (temp_oldpwd)
+		env->oldpwd = ft_strdup(temp_oldpwd);
+	else
+		env->oldpwd = NULL;
 	env->pwd = temp_pwd;
 }

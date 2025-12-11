@@ -6,7 +6,7 @@
 /*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 11:34:05 by banne             #+#    #+#             */
-/*   Updated: 2025/12/09 12:32:29 by banne            ###   ########.fr       */
+/*   Updated: 2025/12/11 12:37:10 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,18 +51,25 @@ int	put_error(t_cmd *cmd, const char *msg)
 
 void	apply_redirections_to_cmd(t_cmd *cmd, t_token *tokens)
 {
+	t_token	*current;
+
 	if (!cmd || !tokens)
 		return ;
-	while (tokens)
+	current = tokens;
+	while (current && current->type != T_PIPE)
 	{
-		if (tokens->type == T_INPUT)
-			cmd->infile = open_input_file(cmd, tokens->str);
-		else if (tokens->type == T_HEREDOC)
-			cmd->infile = create_heredoc(cmd, tokens->str);
-		else if (tokens->type == T_TRUNC)
-			cmd->outfile = open_output_trunc(cmd, tokens->str);
-		else if (tokens->type == T_APPEND)
-			cmd->outfile = open_output_append(cmd, tokens->str);
-		tokens = tokens->next;
+		if (current->type == T_INPUT)
+			cmd->infile = open_input_file(cmd, current->str);
+		else if (current->type == T_HEREDOC)
+		{
+			cmd->infile = create_heredoc(cmd, current->str);
+			if (cmd->infile < 0)
+				return ;
+		}
+		else if (current->type == T_TRUNC)
+			cmd->outfile = open_output_trunc(cmd, current->str);
+		else if (current->type == T_APPEND)
+			cmd->outfile = open_output_append(cmd, current->str);
+		current = current->next;
 	}
 }

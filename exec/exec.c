@@ -6,7 +6,7 @@
 /*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 11:33:53 by banne             #+#    #+#             */
-/*   Updated: 2025/12/09 17:39:36 by banne            ###   ########.fr       */
+/*   Updated: 2025/12/11 12:21:57 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,8 @@ void	run_builtin_in_parent(t_cmd *cmd, t_env *env, t_data *data)
 		ft_exit(cmd->args, data);
 	else if (ft_strcmp(cmd->args[0], "cd") == 0)
 		ft_cd(cmd->args, env);
-	//else if (ft_strcmp(cmd->args[0], "export") == 0)
-	//	ft_export(cmd->args, env);
+	else if (ft_strcmp(cmd->args[0], "export") == 0)
+		ft_export(cmd->args, env);
 	else if (ft_strcmp(cmd->args[0], "unset") == 0)
 		ft_unset(cmd->args, env);
 }
@@ -65,4 +65,3 @@ void	exec_cmd(t_data *data)
 	else
 		waitpid(pid, NULL, 0);
 }
-

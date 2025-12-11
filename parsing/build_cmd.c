@@ -6,21 +6,21 @@
 /*   By: jhauvill <jhauvill@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 11:19:19 by jhauvill          #+#    #+#             */
-/*   Updated: 2025/12/10 14:13:53 by jhauvill         ###   ########.fr       */
+/*   Updated: 2025/12/11 15:20:37 by jhauvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-void	print_tokens(t_token *tokens)
-{
-    const char *types[] = {"", "T_INPUT", "T_HEREDOC", "T_TRUNC", "T_APPEND", "T_PIPE", "T_CMD", "T_ARG"};
-    while (tokens)
-    {
-        printf("Token: '%s', Type: %s (%d)\n", tokens->str, types[tokens->type], tokens->type);
-        tokens = tokens->next;
-    }
-}
+//void	print_tokens(t_token *tokens)
+//{
+//    const char *types[] = {"", "T_INPUT", "T_HEREDOC", "T_TRUNC", "T_APPEND", "T_PIPE", "T_CMD", "T_ARG"};
+//    while (tokens)
+//    {
+//        printf(RED"Token: '%s', Type: %s (%d)\n"RESET, tokens->str, types[tokens->type], tokens->type);
+//        tokens = tokens->next;
+//    }
+//}
 
 static t_cmd	*create_cmd(t_token *tokens)
 {
@@ -39,6 +39,8 @@ static t_cmd	*create_cmd(t_token *tokens)
 			break ;
 		tokens = tokens->next;
 	}
+	if (i == 0)
+		i = 1;
 	cmd->args = malloc(sizeof(char *) * (i + 1));
 	if (!cmd->args)
 		return (NULL);
@@ -56,11 +58,14 @@ t_cmd	*build_cmd(t_token *tokens)
 	t_cmd	*head;
 	t_cmd	*cmd;
 	int		i;
+	int		redir_i;
+	char	*expanded;
 
 	cmd = create_cmd(tokens);
 	head = cmd;
 	i = 0;
-	print_tokens(tokens);
+	redir_i = 0;
+	//print_tokens(tokens);
 	while (tokens)
 	{
 		if (tokens->type == T_PIPE)
@@ -70,9 +75,19 @@ t_cmd	*build_cmd(t_token *tokens)
 			cmd = cmd->next;
 			i = 0;
 		}
+		if (tokens->type == T_APPEND || tokens->type == T_HEREDOC
+			|| tokens->type == T_INPUT || tokens->type == T_TRUNC)
+		{
+			cmd->redir[redir_i] = (*tokens);
+			i++;
+		}
 		else if (tokens->type == T_CMD || tokens->type == T_ARG)
 		{
-			cmd->args[i] = expand(tokens->str);
+			expanded = expand(tokens->str);
+			if (expanded)
+				cmd->args[i] = expanded;
+			else
+				cmd->args[i] = NULL;
 			i++;
 		}
 		tokens = tokens->next;

@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: jhauvill <jhauvill@student.42.fr>          +#+  +:+       +#+         #
+#    By: banne <banne@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/12/09 15:02:14 by jhauvill          #+#    #+#              #
-#    Updated: 2025/12/10 12:36:58 by jhauvill         ###   ########.fr        #
+#    Updated: 2025/12/11 09:23:18 by banne            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -47,6 +47,7 @@ SOURCES = \
 	utils/export_copy.c \
 	utils/cleanup.c \
 	utils/env_init.c \
+	utils/print_export.c
 
 OBJECTS = $(SOURCES:.c=.o)
 

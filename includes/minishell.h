@@ -6,7 +6,7 @@
 /*   By: jhauvill <jhauvill@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 11:11:35 by jhauvill          #+#    #+#             */
-/*   Updated: 2025/12/10 13:49:09 by jhauvill         ###   ########.fr       */
+/*   Updated: 2025/12/11 15:21:06 by jhauvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,8 @@
 # include <stdbool.h>
 # include <readline/readline.h>
 # include <readline/history.h>
-#include <sys/types.h>
-#include <sys/wait.h>
+# include <sys/types.h>
+# include <sys/wait.h>
 # include "../libft/libft.h"
 
 /* Colors */
@@ -51,6 +51,7 @@ typedef struct s_token
 
 typedef struct s_cmd
 {
+	t_token			*redir;
 	char			**args;		//NULL terminated
 	int				infile;		//fd or stdin
 	int				outfile;	//fd or stdout
@@ -93,124 +94,130 @@ typedef struct s_export
 }	t_export;
 
 /* exec.c */
-void	exec_cmd(t_data *data);
-bool	is_builtin_in_parent(t_cmd *cmd);
+void		exec_cmd(t_data *data);
+bool		is_builtin_in_parent(t_cmd *cmd);
 
 /* exec_single_cmd.c */
-void	exec_child(t_cmd *cmd, t_env *env, t_token *tokens);
-void	exec_single_cmd(t_cmd *cmd, char **envp);
-bool	is_builtin_child(t_cmd *cmd);
+void		exec_child(t_cmd *cmd, t_env *env, t_token *tokens);
+void		exec_single_cmd(t_cmd *cmd, char **envp);
+bool		is_builtin_child(t_cmd *cmd);
 
 /* exec_pipeline.c */
-int		count_pipes(t_token *tokens);
-int		**init_pipes(int nbr_cmds);
-void	exec_pipeline(t_cmd *cmd, t_env *env, t_token *tokens);
+int			count_pipes(t_token *tokens);
+int			**init_pipes(int nbr_cmds);
+void		exec_pipeline(t_cmd *cmd, t_env *env, t_token *tokens);
 
 /* redirection.c */
-int		open_input_file(t_cmd *cmd, const char *file);
-int		open_output_trunc(t_cmd *cmd, const char *file);
-int		open_output_append(t_cmd *cmd, const char *file);
-int		put_error(t_cmd *cmd, const char *msg);
-void	apply_redirections_to_cmd(t_cmd *cmd, t_token *tokens);
+int			open_input_file(t_cmd *cmd, const char *file);
+int			open_output_trunc(t_cmd *cmd, const char *file);
+int			open_output_append(t_cmd *cmd, const char *file);
+int			put_error(t_cmd *cmd, const char *msg);
+void		apply_redirections_to_cmd(t_cmd *cmd, t_token *tokens);
 
 /* find_path.c */
-char	**parse_envp(char **envp);
-char	*get_full_path(char *dir, char *cmd);
-char	*check_path(int n, char **paths, char *cmd);
-bool	exists_n_executable(char *path);
-char	*find_cmd(t_cmd *cmd, char **envp);
+char		**parse_envp(char **envp);
+char		*get_full_path(char *dir, char *cmd);
+char		*check_path(int n, char **paths, char *cmd);
+bool		exists_n_executable(char *path);
+char		*find_cmd(t_cmd *cmd, char **envp);
 
 /* heredoc.c */
-int		fill_here_doc(t_cmd *cmd, const char *limiter, int write_fd);
-int		create_heredoc(t_cmd *cmd, const char *limiter);
+int			fill_here_doc(t_cmd *cmd, const char *limiter, int write_fd);
+int			create_heredoc(t_cmd *cmd, const char *limiter);
 
 /* pipeline_utils.c */
-bool	have_redirections(t_cmd *cmd);
-int		command_not_found(t_cmd *cmd);
-int		**pipe_error(int **pipe_fd, int nbr_pipes);
+bool		have_redirections(t_cmd *cmd);
+int			command_not_found(t_cmd *cmd);
+int			**pipe_error(int **pipe_fd, int nbr_pipes);
 
 /* close_all.c */
-void	close_fds(t_cmd *cmd);
-void	close_pipes_fds(int **pipe_fd, int nbr_pipes);
-void	close_all_pipes(int **pipe_fd, int nbr_pipes, t_cmd *cmd);
+void		close_fds(t_cmd *cmd);
+void		close_pipes_fds(int **pipe_fd, int nbr_pipes);
+void		close_all_pipes(int **pipe_fd, int nbr_pipes, t_cmd *cmd);
 
 /* free_pipe.c */
-int		free_all_pipes(int **pipe_fd, int nbr_pipes);
+int			free_all_pipes(int **pipe_fd, int nbr_pipes);
 
 /* pwd.c */
-void	ft_pwd(void);
+void		ft_pwd(void);
 
 /* echo.c */
-void	ft_echo(char **args);
+void		ft_echo(char **args);
 
 /* env.c */
-int		ft_env(char **args, char **envp);
+int			ft_env(char **args, char **envp);
 
 /* exit.c */
-int		ft_exit(char **args, t_data *data);
+int			ft_exit(char **args, t_data *data);
 
 /* cd.c */
-int		ft_cd(char **args, t_env *env);
+int			ft_cd(char **args, t_env *env);
 
 /* unset.c */
-void	ft_unset(char **args, t_env *env);
+void		ft_unset(char **args, t_env *env);
 
 /* export.c */
-void	ft_export(char **args, t_env *env);
-char	**env_remove(t_env *env, t_export export);
+int			ft_export(char **args, t_env *env);
+char		**env_remove(t_env *env, t_export export);
 
-/* export copy */
-char	**env_copy(t_env *env);
-char	**env_init(char **envp);
-void	copy_env(t_env *env, char **new_envp);
-void	copy_update_env(t_env *env, char **new_envp, int env_size, t_export export);
-void	copy_remove_env(t_env *env, char **new_envp, int env_size, t_export export);
+/* export utils */
+int			print_export(t_env *env);
+char		**env_add(t_env *env, t_export export);
+char		**env_update(t_env *env, t_export export);
+t_export	extract_export(char *arg);
+char		**env_copy(t_env *env);
+char		**env_init(char **envp);
+void		copy_env(t_env *env, char **new_envp);
+void		copy_update_env(t_env *env, char **copy, int size, t_export export);
+void		copy_remove_env(t_env *env, char **copy, int size, t_export export);
 
 /* set_envp_path.c */
-void	set_envp_paths(t_env *env);
-char	*get_home_directory(t_env *env);
-char	*get_oldpwd_directory(t_env *env);
-char	*get_current_directory(void);
-bool	verif_dir(const char *home, const char *oldpwd, const char *current);
+void		set_envp_paths(t_env *env);
+char		*get_home_directory(t_env *env);
+char		*get_oldpwd_directory(t_env *env);
+char		*get_current_directory(void);
+bool		verif_dir(const char *home, const char *oldpwd, const char *current);
 
 /* update_env.c */
-void	free_envp(char **envp);
-char	**new_envp(t_env *env);
+void		free_envp(char **envp);
+char		**new_envp(t_env *env);
 
 /* cd.c helpers */
-void	update_env_paths(t_env *env);
-int		no_file_or_dir(char *path);
+void		update_env_paths(t_env *env);
+int			no_file_or_dir(char *path);
 
 /* unset.c */
-bool	is_valid_identifier(char *arg);
-bool	env_exist(t_env *env, char *arg);
+bool		is_valid_identifier(char *arg);
+bool		env_exist(t_env *env, char *arg);
 
 //parsing
-void	add_token(t_token **tokens, char *str, t_tokentype type);
-int		is_redir(char *line, char *next_line, t_token **tokens);
-int		is_pipe(char *line, t_token **tokens);
-int		is_cmd(char *line, t_token **tokens);
-int		count_cmd_data(t_data *data);
-t_token	*lexer(char *line);
-t_cmd	*build_cmd(t_token *tokens);
-char	*expand(char *str);
-char	*remove_quotes(char *str, int *quote);
+void		add_token(t_token **tokens, char *str, t_tokentype type);
+int			is_redir(char *line, char *next_line, t_token **tokens);
+int			is_pipe(char *line, t_token **tokens);
+int			is_cmd(char *line, t_token **tokens);
+int			count_cmd_data(t_data *data);
+t_token		*lexer(char *line);
+t_cmd		*build_cmd(t_token *tokens);
+char		*expand(char *str);
+char		*remove_quotes(char *str, int *quote);
 
 //cleanup
-void	free_tokens(t_token *tokens);
-void	free_cmds(t_cmd *cmds);
-void	cleanup_iteration(t_data *data);
+void		free_tokens(t_token *tokens);
+void		free_cmds(t_cmd *cmds);
+void		cleanup_iteration(t_data *data);
 
 //signals
-void	setup_prompt_signals(void);
-void	setup_heredoc_signals(void);
-void	setup_child_signals(void);
+void		setup_prompt_signals(void);
+void		setup_heredoc_signals(void);
+void		setup_child_signals(void);
 
 //utils
-void	free_envp(char **envp);
-char	**new_envp(t_env *env);
-int		get_env_size(t_env *env);
-void	write_env_var(char *dest, t_export export, int key_len);
-int		count_cmd_data(t_data *data);
+void		free_envp(char **envp);
+char		**new_envp(t_env *env);
+int			get_env_size(t_env *env);
+void		write_env_var(char *dest, t_export export, int key_len);
+int			count_cmd_data(t_data *data);
+void		cleanup_all(t_data *data);
+int			count_pipes(t_token *tokens);
 
 #endif 

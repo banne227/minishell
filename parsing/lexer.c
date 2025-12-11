@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jhauvill <jhauvill@student.42.fr>          +#+  +:+       +#+        */
+/*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/04 15:00:01 by jhauvill          #+#    #+#             */
-/*   Updated: 2025/12/10 13:55:44 by jhauvill         ###   ########.fr       */
+/*   Updated: 2025/12/11 10:39:27 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,7 +141,6 @@ t_token	*lexer(char *line)
 			i++;
 		}
 	}
-	//debug_tokens(tokens);
-	//free(tab);
+	free(tab);
 	return (tokens);
 }
