@@ -6,29 +6,39 @@
 /*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 11:34:03 by banne             #+#    #+#             */
-/*   Updated: 2025/12/11 12:33:21 by banne            ###   ########.fr       */
+/*   Updated: 2025/12/22 16:56:58 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-int	fill_here_doc(t_cmd *cmd, const char *limiter, int write_fd)
+void	print_warning(const char *limiter)
+{
+	ft_putstr_fd("warning: here-document delimited ", 2);
+	ft_fprintf("by end-of-file (wanted ", (char *)limiter, ")\n");
+}
+
+int	fill(t_cmd *cmd, const char *limiter, int write_fd, t_data *data)
 {
 	char	*line;
 
 	if (!limiter || write_fd < 0)
 		return (put_error(cmd, "Invalid heredoc parameters\n"));
-	(void)cmd;
 	while (1)
 	{
 		line = readline("heredoc> ");
 		if (!line)
+		{
+			free(line);
+			print_warning(limiter);
 			break ;
+		}
 		if (strcmp(line, limiter) == 0)
 		{
 			free(line);
 			break ;
 		}
+		line = expand(line, data);
 		ft_putstr_fd(line, write_fd);
 		ft_putstr_fd("\n", write_fd);
 		free(line);
@@ -36,7 +46,7 @@ int	fill_here_doc(t_cmd *cmd, const char *limiter, int write_fd)
 	return (1);
 }
 
-int	create_heredoc(t_cmd *cmd, const char *limiter)
+int	create_heredoc(t_cmd *cmd, const char *limiter, t_data *data)
 {
 	int		hd[2];
 	pid_t	pid;
@@ -52,10 +62,10 @@ int	create_heredoc(t_cmd *cmd, const char *limiter)
 	if (pid == 0)
 	{
 		close(hd[0]);
-		if (fill_here_doc(cmd, limiter, hd[1]) == -1)
-			exit(1);
+		if (fill(cmd, limiter, hd[1], data) == -1)
+			exit_error(1, data);
 		close(hd[1]);
-		exit(0);
+		exit_error(0, data);
 	}
 	else
 		close(hd[1]);

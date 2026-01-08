@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   export_utils.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
+/*   By: jhauvill <jhauvill@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 16:15:10 by banne             #+#    #+#             */
-/*   Updated: 2025/12/11 15:57:54 by banne            ###   ########.fr       */
+/*   Updated: 2025/12/19 14:34:23 by jhauvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ void	write_env_var(char *dest, t_export export, int len_key)
 	{
 		ft_memcpy(dest, export.key, len_key);
 		dest[len_key] = '=';
-		len_value = strlen(export.value);
+		len_value = ft_strlen(export.value);
 		ft_memcpy(dest + len_key + 1, export.value, len_value);
 		dest[len_key + 1 + len_value] = '\0';
 	}
@@ -62,9 +62,9 @@ char	**env_add(t_env *env, t_export export)
 	if (!new_envp)
 		return (0);
 	if (export.value)
-		len = strlen(export.key) + strlen(export.value) + 2;
+		len = ft_strlen(export.key) + ft_strlen(export.value) + 2;
 	else
-		len = strlen(export.key) + 2;
+		len = ft_strlen(export.key) + 2;
 	new_envp[env_size] = malloc(sizeof(char) * len);
 	if (!new_envp[env_size])
 	{
@@ -72,7 +72,7 @@ char	**env_add(t_env *env, t_export export)
 		return (0);
 	}
 	copy_env(env, new_envp);
-	write_env_var(new_envp[env_size], export, strlen(export.key));
+	write_env_var(new_envp[env_size], export, ft_strlen(export.key));
 	new_envp[env_size + 1] = NULL;
 	return (new_envp);
 }

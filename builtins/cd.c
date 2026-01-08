@@ -6,7 +6,7 @@
 /*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 14:36:27 by banne             #+#    #+#             */
-/*   Updated: 2025/12/11 15:56:54 by banne            ###   ########.fr       */
+/*   Updated: 2026/01/08 10:53:39 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ void	update_env_paths(t_env *env)
 
 int	no_file_or_dir(char *path)
 {
-	fprintf(stderr, "cd: %s: No such file or directory\n", path);
+	ft_fprintf("cd: ", path, ": No such file or directory\n");
 	return (1);
 }
 
@@ -72,15 +72,19 @@ int	ft_cd(char **args, t_env *env)
 	char	*prev;
 	char	*target;
 
-	if (!verif_dir(env->home, env->oldpwd, env->pwd))
-		return (1);
 	target = args[1];
-	if (!target)
+	if (!target || ft_strcmp(target, "~") == 0)
+	{
+		if (!verif_home_dir(env))
+			return (1);
 		target = env->home;
+	}
 	if (ft_strcmp(target, "-") == 0)
 	{
+		if (!verif_oldpwd_dir(env->oldpwd))
+			return (1);
 		target = env->oldpwd;
-		printf("%s\n", target);
+		ft_printf("%s\n", target);
 	}
 	if (!target || chdir(target) == -1)
 		return (no_file_or_dir(target));
@@ -89,6 +93,5 @@ int	ft_cd(char **args, t_env *env)
 		prev = get_previous_dir(env->pwd);
 		free(prev);
 	}
-	update_env_paths(env);
-	return (0);
+	return (update_env_paths(env), 0);
 }

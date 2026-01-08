@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   set_envp_path.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
+/*   By: jhauvill <jhauvill@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 18:12:34 by banne             #+#    #+#             */
-/*   Updated: 2025/12/11 11:39:35 by banne            ###   ########.fr       */
+/*   Updated: 2025/12/18 19:00:18 by jhauvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,21 +55,23 @@ char	*get_current_directory(void)
 	return (NULL);
 }
 
-bool	verif_dir(const char *home, const char *oldpath, const char *current)
+bool	verif_dir(const char *home, const char *oldpath, const char *curr)
 {
+	if (!home || !oldpath || !curr)
+		return (false);
 	if (access(home, F_OK) != 0)
 	{
-		fprintf(stderr, "cd: Home  not set\n");
+		ft_putstr_fd("cd: Home  not set\n", 2);
 		return (false);
 	}
 	if (access(oldpath, F_OK) != 0)
 	{
-		fprintf(stderr, "cd: OLDPWD not set\n");
+		ft_putstr_fd("cd: OLDPWD not set\n", 2);
 		return (false);
 	}
-	if (access(current, F_OK) != 0)
+	if (access(curr, F_OK) != 0)
 	{
-		fprintf(stderr, "cd: PWD not set\n");
+		ft_putstr_fd("cd: PWD not set\n", 2);
 		return (false);
 	}
 	return (true);

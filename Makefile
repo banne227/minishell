@@ -6,7 +6,7 @@
 #    By: banne <banne@student.42.fr>                +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/12/09 15:02:14 by jhauvill          #+#    #+#              #
-#    Updated: 2025/12/11 09:23:18 by banne            ###   ########.fr        #
+#    Updated: 2025/12/23 11:06:53 by banne            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,6 +22,8 @@ SOURCES = \
 	parsing/tokenizer.c \
 	parsing/expand.c \
 	parsing/quotes.c \
+	parsing/expand_utils.c \
+	parsing/lexer_utils.c \
 	signals/signal.c \
 	signals/signals_heredoc.c \
 	exec/close_all.c \
@@ -47,7 +49,12 @@ SOURCES = \
 	utils/export_copy.c \
 	utils/cleanup.c \
 	utils/env_init.c \
-	utils/print_export.c
+	utils/print_export.c \
+	utils/error.c \
+	utils/verif.c \
+	utils/utils_free.c \
+	exec/default_heredoc.c \
+	exec/builtins.c
 
 OBJECTS = $(SOURCES:.c=.o)
 
@@ -68,10 +75,17 @@ clean:
 	$(RM) $(OBJECTS)
 	$(MAKE) -C $(LIBFT_DIR) clean
 
+c:
+	$(RM) $(OBJECTS)
+	$(MAKE) -C $(LIBFT_DIR) clean
+	clear
+	
 fclean: clean
 	$(RM) $(NAME)
 	$(RM) $(LIBFT_DIR)/libft.a
 
 re: fclean all
+
+r: fclean all c
 
 .PHONY: all clean fclean re

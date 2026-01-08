@@ -6,7 +6,7 @@
 /*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 11:23:10 by banne             #+#    #+#             */
-/*   Updated: 2025/12/09 16:47:19 by banne            ###   ########.fr       */
+/*   Updated: 2025/12/18 20:30:22 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,21 +80,21 @@ bool	exists_n_executable(char *path)
 			return (true);
 		else
 		{
-			fprintf(stderr, "minishell: %s: Permission denied\n", path);
+			ft_fprintf("minishell: ", path, ": Permission denied\n");
 			return (false);
 		}
 	}
-	fprintf(stderr, "minishell: %s: No such file or directory\n", path);
+	ft_fprintf("minishell: ", path, ": No such file or directory\n");
 	return (false);
 }
 
-char	*find_cmd(t_cmd *cmd, char **envp)
+char	*find_cmd(t_cmd *cmd, char **envp, t_data *minishell)
 {
 	char	**paths;
 	char	*full_path;
 	int		n;
 
-	if (!cmd || ft_strlen(cmd->args[0]) == 0)
+	if (!cmd || !cmd->args[0] || ft_strlen(cmd->args[0]) == 0)
 		return (NULL);
 	if (ft_strchr(cmd->args[0], '/'))
 	{
@@ -112,6 +112,6 @@ char	*find_cmd(t_cmd *cmd, char **envp)
 	full_path = check_path(n, paths, cmd->args[0]);
 	if (full_path)
 		return (full_path);
-	fprintf(stderr, "minishell: %s: command not found\n", cmd->args[0]);
+	minishell->last_exit_status = 127;
 	return (NULL);
 }

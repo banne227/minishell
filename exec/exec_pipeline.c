@@ -6,7 +6,7 @@
 /*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 11:33:46 by banne             #+#    #+#             */
-/*   Updated: 2025/12/11 12:32:23 by banne            ###   ########.fr       */
+/*   Updated: 2025/12/23 11:03:54 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,30 +36,32 @@ int	**init_pipes(int nbr_cmds)
 	return (pipe_fd);
 }
 
-void	exec_cmd_pipe(t_cmd *cmd, int **pipe_fd, int cmd_i, t_data *minishell)
+void	exec_cmd_pipe(t_cmd *cmd, int cmd_i, t_data *minishell, t_pipe *pipe)
 {
 	char	*path_cmd;
 
-	if (have_redirections(cmd))
-		apply_redirections_to_cmd(cmd, minishell->tokens);
-	path_cmd = find_cmd(cmd, minishell->env->envp);
-	if (path_cmd == NULL)
-		exit(command_not_found(cmd));
-	if (cmd->infile != STDIN_FILENO)
+	apply_redirections_to_cmd(cmd, minishell);
+	if (cmd->infile != STDIN_FILENO && cmd->infile != -1 && cmd_i == 0)
 		dup2(cmd->infile, STDIN_FILENO);
 	else if (cmd_i > 0)
-		dup2(pipe_fd[cmd_i - 1][0], STDIN_FILENO);
+		dup2(pipe->pipe_fd[cmd_i - 1][0], STDIN_FILENO);
 	if (cmd->outfile != STDOUT_FILENO)
 		dup2(cmd->outfile, STDOUT_FILENO);
 	else if (cmd_i < minishell->cmd_count - 1)
-		dup2(pipe_fd[cmd_i][1], STDOUT_FILENO);
-	close_all_pipes(pipe_fd, minishell->cmd_count - 1, cmd);
+		dup2(pipe->pipe_fd[cmd_i][1], STDOUT_FILENO);
+	close_all_pipes(pipe->pipe_fd, minishell->cmd_count - 1, cmd);
+	if (is_builtin(cmd))
+		handel_builtin(cmd, pipe, minishell);
+	path_cmd = find_cmd(cmd, minishell->env->envp, minishell);
+	if (path_cmd == NULL)
+		exit(command_not_found(cmd, minishell));
 	execve(path_cmd, cmd->args, minishell->env->envp);
 	perror("execve cmd failed");
+	free(path_cmd);
 	exit(EXIT_FAILURE);
 }
 
-void	fork_and_exec(pid_t *pids, int **pipe_fd, t_data *minishell)
+void	fork_and_exec(t_pipe pipe_struct, t_data *minishell)
 {
 	int		i;
 	t_cmd	*current_cmd;
@@ -68,54 +70,58 @@ void	fork_and_exec(pid_t *pids, int **pipe_fd, t_data *minishell)
 	current_cmd = minishell->cmds;
 	while (i < minishell->cmd_count && current_cmd)
 	{
-		pids[i] = fork();
-		if (pids[i] < 0)
+		pipe_struct.pids[i] = fork();
+		if (pipe_struct.pids[i] < 0)
 		{
 			perror("fork failed");
+			minishell->last_exit_status = 1;
 			exit(EXIT_FAILURE);
 		}
-		if (pids[i] == 0)
-			exec_cmd_pipe(current_cmd, pipe_fd, i, minishell);
+		if (pipe_struct.pids[i] == 0)
+			exec_cmd_pipe(current_cmd, i, minishell, &pipe_struct);
 		current_cmd = current_cmd->next;
 		i++;
 	}
 }
 
-void	pipe_execute(t_data *minishell)
+void	pipe_execute(t_data *minishell, t_data *data)
 {
 	int		i;
-	pid_t	*pids;
-	int		**pipe_fd;
+	t_pipe	pipe_struct;
 
-	pids = malloc(sizeof(pid_t) * minishell->cmd_count);
-	if (!pids)
+	pipe_struct.pids = malloc(sizeof(pid_t) * minishell->cmd_count);
+	if (!pipe_struct.pids)
 	{
 		perror("malloc failed");
 		return ;
 	}
-	pipe_fd = init_pipes(minishell->cmd_count);
-	if (!pipe_fd)
-		return ;
-	i = 0;
-	fork_and_exec(pids, pipe_fd, minishell);
-	close_all_pipes(pipe_fd, minishell->cmd_count - 1, NULL);
-	while (i < minishell->cmd_count)
+	pipe_struct.pipe_fd = init_pipes(minishell->cmd_count);
+	if (!pipe_struct.pipe_fd)
 	{
-		waitpid(pids[i], NULL, 0);
-		i++;
+		free(pipe_struct.pids);
+		return ;
 	}
-	minishell->last_exit_status = 0;
-	free_all_pipes(pipe_fd, minishell->cmd_count - 1);
-	free(pids);
+	pipe_struct.orig_data = data;
+	fork_and_exec(pipe_struct, minishell);
+	close_all_pipes(pipe_struct.pipe_fd, minishell->cmd_count - 1, NULL);
+	i = 0;
+	while (i < minishell->cmd_count)
+		get_status(pipe_struct.pids[i++], minishell);
+	free_all_pipes(pipe_struct.pipe_fd, minishell->cmd_count - 1);
+	if (pipe_struct.pids)
+		free(pipe_struct.pids);
 }
 
-void	exec_pipeline(t_cmd *cmd, t_env *env, t_token *tokens)
+void	exec_pipeline(t_cmd *cmd, t_env *env, t_token *tokens, t_data *data)
 {
 	t_data	minishell;
 
 	minishell.cmds = cmd;
 	minishell.env = env;
 	minishell.tokens = tokens;
+	minishell.last_exit_status = data->last_exit_status;
+	minishell.here_doc = 0;
+	minishell.need_free = false;
 	minishell.cmd_count = 0;
 	while (minishell.cmds && minishell.cmds->args)
 	{
@@ -123,5 +129,5 @@ void	exec_pipeline(t_cmd *cmd, t_env *env, t_token *tokens)
 		minishell.cmds = minishell.cmds->next;
 	}
 	minishell.cmds = cmd;
-	pipe_execute(&minishell);
+	pipe_execute(&minishell, data);
 }

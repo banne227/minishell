@@ -6,7 +6,7 @@
 /*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 11:34:05 by banne             #+#    #+#             */
-/*   Updated: 2025/12/11 12:37:10 by banne            ###   ########.fr       */
+/*   Updated: 2025/12/15 12:38:18 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,30 +42,43 @@ int	open_output_append(t_cmd *cmd, const char *file)
 	return (cmd->outfile);
 }
 
-int	put_error(t_cmd *cmd, const char *msg)
+void	do_redirections(t_cmd *cmd)
 {
-	cmd->error = true;
-	fprintf(stderr, "minishell: %s\n", msg);
-	return (-1);
+	if (cmd->infile != STDIN_FILENO)
+	{
+		if (dup2(cmd->infile, STDIN_FILENO) == -1)
+		{
+			put_error(cmd, "dup2 infile failed");
+			return ;
+		}
+		close(cmd->infile);
+		cmd->infile = STDIN_FILENO;
+	}
+	if (cmd->outfile != STDOUT_FILENO)
+	{
+		if (dup2(cmd->outfile, STDOUT_FILENO) == -1)
+		{
+			put_error(cmd, "dup2 outfile failed");
+			return ;
+		}
+		close(cmd->outfile);
+		cmd->outfile = STDOUT_FILENO;
+	}
 }
 
-void	apply_redirections_to_cmd(t_cmd *cmd, t_token *tokens)
+void	apply_redirections_to_cmd(t_cmd *cmd, t_data *data)
 {
 	t_token	*current;
 
-	if (!cmd || !tokens)
+	if (!cmd || !cmd->redir)
 		return ;
-	current = tokens;
-	while (current && current->type != T_PIPE)
+	current = cmd->redir;
+	while (current)
 	{
 		if (current->type == T_INPUT)
 			cmd->infile = open_input_file(cmd, current->str);
 		else if (current->type == T_HEREDOC)
-		{
-			cmd->infile = create_heredoc(cmd, current->str);
-			if (cmd->infile < 0)
-				return ;
-		}
+			cmd->infile = create_heredoc(cmd, current->str, data);
 		else if (current->type == T_TRUNC)
 			cmd->outfile = open_output_trunc(cmd, current->str);
 		else if (current->type == T_APPEND)

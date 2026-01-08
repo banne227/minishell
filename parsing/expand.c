@@ -3,78 +3,111 @@
 /*                                                        :::      ::::::::   */
 /*   expand.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jhauvill <jhauvill@student.42.fr>          +#+  +:+       +#+        */
+/*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/10 11:37:10 by jhauvill          #+#    #+#             */
-/*   Updated: 2025/12/11 15:21:28 by jhauvill         ###   ########.fr       */
+/*   Updated: 2025/12/23 12:07:05 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-int	expand_var(char	*result, int *j, int var_len, int var_start, char *str)
+int	get_var_len(char *str)
 {
+	int	len;
+
+	len = 0;
+	while (str[len] && (ft_isalnum(str[len]) || str[len] == '_'))
+		len++;
+	return (len);
+}
+
+static	void	copy_env_value(t_expand *expand, char *var, t_env *env)
+{
+	char	*var_env;
 	int		k;
-	char	*env;
-	char	var_name[var_len + 1];
 
 	k = 0;
-	ft_strlcpy(var_name, str + var_start, var_len + 1);
-	env = getenv(var_name);
-	if (env)
-    {
-		while (env[k])
-		result[(*j)++] = env[k++];
+	var_env = get_env(env, var);
+	if (!var_env)
+		return ;
+	while (var_env[k])
+	{
+		expand->result[expand->j++] = var_env[k++];
 	}
-	return (var_len + 1);
+	free(var_env);
 }
 
-char	*env_to_cmd(char *str, int *quote)
+static int	handle_dollar(char *str, t_expand *expand, t_data *data)
 {
-    int		i;
-	int 	var_start;
-	int		j;
-    char	*result;
 	int		var_len;
-	
-	j = 0;
-	i = 0;
-	result = malloc(ft_strlen(str) * 2 + 1); // buffer large
-    if (!result)
-        return NULL;
-    while (str[i])
-    {
-        if (str[i] == '$' && (!quote || *quote != 1))
-        {
-			var_start = i + 1;
-			var_len = 0;
-			while (str[var_start + var_len] && (ft_isalnum(str[var_start + var_len])
-				|| str[var_start + var_len] == '_'))
-                var_len++;
-            if (var_len > 0)
-				i += expand_var(result, &j, var_len, var_start, str);
-            else
-                result[j++] = str[i++];
-        }
-        else
-            result[j++] = str[i++];
-    }
-    result[j] = '\0';
-    return result;
+	char	*var;
+	char	*exit_status;
+	int		k;
+
+	(expand->i)++;
+	if (str[expand->i] == '?')
+	{
+		exit_status = ft_itoa(data->last_exit_status);
+		k = 0;
+		while (exit_status[k])
+			expand->result[expand->j++] = exit_status[k++];
+		(expand->i)++;
+		return (free(exit_status), 0);
+	}
+	var_len = get_var_len(&str[expand->i]);
+	if (var_len == 0)
+		return (0);
+	var = malloc(var_len + 1);
+	if (!var)
+		return (-1);
+	ft_strlcpy(var, &str[expand->i], var_len + 1);
+	copy_env_value(expand, var, data->env);
+	expand->i += var_len;
+	return (free(var), 0);
 }
 
-char	*expand(char *str)
+char	*env_to_cmd(char *str, int *quote, t_data *data)
 {
-    int		quote;
-    char	*no_quotes;
-    char	*result;
+	t_expand	expand;
+	int			alloc_size;
 
-    quote = 0;
-    no_quotes = remove_quotes(str, &quote);
-    if (str[0] == '$' && quote == 1) // quote == 1 => quotes simples
-        result = ft_strdup(no_quotes); // Pas d'expansion
-    else
-        result = env_to_cmd(no_quotes, &quote);
-    free(no_quotes);
-    return (result);
+	expand.j = 0;
+	expand.i = 0;
+	alloc_size = expand_len(str, quote, data->env, 0) + 1;
+	expand.result = malloc(sizeof(char) * alloc_size);
+	if (!expand.result)
+		return (NULL);
+	while (str && str[expand.i])
+	{
+		if (str[expand.i] == '$' && (!quote || *quote != 1)
+			&& str[expand.i + 1])
+		{
+			if (handle_dollar(str, &expand, data) == -1)
+			{
+				free(expand.result);
+				return (NULL);
+			}
+		}
+		else
+			expand.result[expand.j++] = str[expand.i++];
+	}
+	expand.result[expand.j] = '\0';
+	return (expand.result);
+}
+
+char	*expand(char *str, t_data *data)
+{
+	int		quote;
+	char	*no_quotes;
+	char	*result;
+
+	quote = 0;
+	no_quotes = remove_quotes(str, &quote);
+	if (str[0] == '$' && quote == 1)
+		result = ft_strdup(no_quotes);
+	else
+		result = env_to_cmd(no_quotes, &quote, data);
+	free(no_quotes);
+	return (result);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   export_copy.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
+/*   By: jhauvill <jhauvill@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 16:15:02 by banne             #+#    #+#             */
-/*   Updated: 2025/12/11 13:52:55 by banne            ###   ########.fr       */
+/*   Updated: 2025/12/19 14:34:13 by jhauvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,14 +30,14 @@ void	copy_update_env(t_env *env, char **copy, int size, t_export export)
 	char	*new_var;
 
 	i = 0;
-	new_var = malloc(strlen(export.key) + 1 + strlen(export.value) + 1);
+	new_var = malloc(ft_strlen(export.key) + 1 + ft_strlen(export.value) + 1);
 	if (!new_var)
 		return ;
-	write_env_var(new_var, export, strlen(export.key));
+	write_env_var(new_var, export, ft_strlen(export.key));
 	while (i < size)
 	{
-		if (ft_strncmp(env->envp[i], export.key, strlen(export.key)) != 0
-			|| env->envp[i][strlen(export.key)] != '=')
+		if (ft_strncmp(env->envp[i], export.key, ft_strlen(export.key)) != 0
+			|| env->envp[i][ft_strlen(export.key)] != '=')
 			copy[i] = ft_strdup(env->envp[i]);
 		else
 			copy[i] = new_var;
@@ -55,8 +55,8 @@ void	copy_remove_env(t_env *env, char **copy, int size, t_export export)
 	i = 0;
 	while (i < size)
 	{
-		if (ft_strncmp(env->envp[i], export.key, strlen(export.key)) != 0
-			|| env->envp[i][strlen(export.key)] != '=')
+		if (ft_strncmp(env->envp[i], export.key, ft_strlen(export.key)) != 0
+			|| env->envp[i][ft_strlen(export.key)] != '=')
 		{
 			copy[j] = ft_strdup(env->envp[i]);
 			j++;

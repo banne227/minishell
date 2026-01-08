@@ -6,7 +6,7 @@
 /*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 16:40:00 by banne             #+#    #+#             */
-/*   Updated: 2025/12/11 12:49:51 by banne            ###   ########.fr       */
+/*   Updated: 2025/12/22 12:22:58 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,20 @@ void	free_tokens(t_token *tokens)
 	}
 }
 
+void	free_redir_tokens(t_token *redir)
+{
+	t_token	*current;
+	t_token	*next;
+
+	current = redir;
+	while (current)
+	{
+		next = current->next;
+		free(current);
+		current = next;
+	}
+}
+
 void	free_cmds(t_cmd *cmds)
 {
 	t_cmd	*current;
@@ -42,12 +56,11 @@ void	free_cmds(t_cmd *cmds)
 		{
 			i = 0;
 			while (current->args[i])
-			{
-				free(current->args[i]);
-				i++;
-			}
+				free(current->args[i++]);
 			free(current->args);
 		}
+		if (current->redir)
+			free_redir_tokens(current->redir);
 		if (current->infile != STDIN_FILENO)
 			close(current->infile);
 		if (current->outfile != STDOUT_FILENO)
@@ -57,8 +70,10 @@ void	free_cmds(t_cmd *cmds)
 	}
 }
 
-void	cleanup_iteration(t_data *data)
+void	cleanup_iteration_n_line(t_data *data, char *line)
 {
+	if (line)
+		free(line);
 	if (!data)
 		return ;
 	if (data->tokens)
@@ -75,6 +90,11 @@ void	cleanup_all(t_data *data)
 
 	if (!data)
 		return ;
+	rl_clear_history();
+	if (data->tokens)
+		free_tokens(data->tokens);
+	if (data->cmds)
+		free_cmds(data->cmds);
 	if (data->env)
 	{
 		if (data->env->envp)
@@ -87,13 +107,8 @@ void	cleanup_all(t_data *data)
 			}
 			free(data->env->envp);
 		}
-		if (data->env->pwd)
-			free(data->env->pwd);
-		if (data->env->oldpwd)
-			free(data->env->oldpwd);
-		if (data->env->home)
-			free(data->env->home);
-		free(data->env);
+		free_data(data);
 	}
-	free(data);
+	if (data && data->need_free)
+		free(data);
 }

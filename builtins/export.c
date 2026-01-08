@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   export.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
+/*   By: jhauvill <jhauvill@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 14:36:38 by banne             #+#    #+#             */
-/*   Updated: 2025/12/11 11:39:01 by banne            ###   ########.fr       */
+/*   Updated: 2025/12/18 18:52:31 by jhauvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,7 +102,7 @@ int	ft_export(char **args, t_env *env)
 		export = extract_export(args[i]);
 		if (export.type == EXPORT_INVALID)
 		{
-			fprintf(stderr, "export: `%s': not a valid identifier\n", args[i]);
+			ft_fprintf("export: ", args[i], ": not a valid identifier\n");
 			error = 1;
 		}
 		else

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipeline_utils.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
+/*   By: jhauvill <jhauvill@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 13:29:28 by banne             #+#    #+#             */
-/*   Updated: 2025/12/09 16:04:48 by banne            ###   ########.fr       */
+/*   Updated: 2025/12/18 18:57:21 by jhauvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,9 +21,10 @@ bool	have_redirections(t_cmd *cmd)
 	return (false);
 }
 
-int	command_not_found(t_cmd *cmd)
+int	command_not_found(t_cmd *cmd, t_data *minishell)
 {
-	fprintf(stderr, "minishell: %s: command not found\n", cmd->args[0]);
+	minishell->last_exit_status = 127;
+	ft_fprintf("minishell: ", cmd->args[0], ": command not found\n");
 	cmd->error = true;
 	if (cmd->infile != STDIN_FILENO)
 		close(cmd->infile);

@@ -6,7 +6,7 @@
 /*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 18:46:13 by banne             #+#    #+#             */
-/*   Updated: 2025/12/10 10:34:30 by banne            ###   ########.fr       */
+/*   Updated: 2025/12/17 11:08:53 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,18 @@ static bool	have_to_update(const char *env_str)
 
 static char	*update_dir(const char *env_str, t_env *env)
 {
+	char	*tmp;
+	char	*res;
+
 	if (ft_strncmp(env_str, "PWD=", 4) == 0)
-		return (ft_strjoin("PWD=", get_current_directory()));
+	{
+		tmp = get_current_directory();
+		if (!tmp)
+			return (NULL);
+		res = ft_strjoin("PWD=", tmp);
+		free(tmp);
+		return (res);
+	}
 	if (ft_strncmp(env_str, "OLDPWD=", 7) == 0)
 		return (ft_strjoin("OLDPWD=", env->pwd));
 	return (NULL);
@@ -37,10 +47,12 @@ void	free_envp(char **envp)
 	i = 0;
 	while (envp[i])
 	{
-		free(envp[i]);
+		if (envp[i])
+			free(envp[i]);
 		i++;
 	}
-	free(envp);
+	if (envp)
+		free(envp);
 }
 
 char	**new_envp(t_env *env)

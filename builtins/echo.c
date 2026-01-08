@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   echo.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
+/*   By: jhauvill <jhauvill@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 14:36:30 by banne             #+#    #+#             */
-/*   Updated: 2025/12/11 11:40:35 by banne            ###   ########.fr       */
+/*   Updated: 2025/12/18 18:58:38 by jhauvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,20 @@
 static void	new_line(int newline)
 {
 	if (newline)
-		printf("\n");
+		ft_printf("\n");
+}
+
+static void	ft_print(char *str)
+{
+	int	i;
+
+	i = 0;
+	while (str[i])
+	{
+		if (str[i] != '\\')
+			ft_printf("%c", str[i]);
+		i++;
+	}
 }
 
 static void	print_echo_args(char **args, int start_index)
@@ -23,13 +36,17 @@ static void	print_echo_args(char **args, int start_index)
 	int	i;
 
 	i = start_index;
-	while (args[i])
+	if (!args[i])
+		return ;
+	while (args[i] && args[i + 1])
 	{
-		printf("%s", args[i]);
-		if (args[i + 1])
-			printf(" ");
+		ft_print(args[i]);
+		if (args[i][0] && args[i + 1][0])
+			ft_printf(" ");
 		i++;
 	}
+	if (args[i])
+		ft_print(args[i]);
 }
 
 void	ft_echo(char **args)

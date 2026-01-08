@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jhauvill <jhauvill@student.42.fr>          +#+  +:+       +#+        */
+/*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 11:11:35 by jhauvill          #+#    #+#             */
-/*   Updated: 2025/12/11 15:21:06 by jhauvill         ###   ########.fr       */
+/*   Updated: 2026/01/08 10:53:34 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,13 @@
 # define GREEN "\033[32m"
 # define YELLOW "\033[33m"
 # define RESET "\033[0m"
+
+typedef struct s_expand
+{
+	int		i;
+	int		j;
+	char	*result;
+}	t_expand;
 
 typedef enum e_tokentype
 {
@@ -73,10 +80,17 @@ typedef struct s_data
 	t_cmd	*cmds;
 	int		cmd_count;
 	int		here_doc;
-	char	*eof_str;
 	int		last_exit_status;
 	t_env	*env;
+	bool	need_free;
 }	t_data;
+
+typedef struct s_pipe
+{
+	int		**pipe_fd;
+	pid_t	*pids;
+	t_data	*orig_data;
+}	t_pipe;
 
 typedef enum e_export_type
 {
@@ -95,39 +109,45 @@ typedef struct s_export
 
 /* exec.c */
 void		exec_cmd(t_data *data);
-bool		is_builtin_in_parent(t_cmd *cmd);
+bool		is_builtin(t_cmd *cmd);
 
 /* exec_single_cmd.c */
-void		exec_child(t_cmd *cmd, t_env *env, t_token *tokens);
-void		exec_single_cmd(t_cmd *cmd, char **envp);
+void		exec_child(t_cmd *cmd, t_data *data, t_token *tokens);
+void		exec_single_cmd(t_cmd *cmd, char **envp, t_data *data);
 bool		is_builtin_child(t_cmd *cmd);
 
 /* exec_pipeline.c */
 int			count_pipes(t_token *tokens);
 int			**init_pipes(int nbr_cmds);
-void		exec_pipeline(t_cmd *cmd, t_env *env, t_token *tokens);
+void		exec_pipeline(t_cmd *cmd, t_env *env, t_token *tokens, t_data *dat);
+void		run_builtin(t_cmd *cmd, t_env *env, t_data *data);
+void		handel_builtin(t_cmd *cmd, t_pipe *pipe, t_data *minishell);
 
 /* redirection.c */
 int			open_input_file(t_cmd *cmd, const char *file);
 int			open_output_trunc(t_cmd *cmd, const char *file);
 int			open_output_append(t_cmd *cmd, const char *file);
 int			put_error(t_cmd *cmd, const char *msg);
-void		apply_redirections_to_cmd(t_cmd *cmd, t_token *tokens);
+void		apply_redirections_to_cmd(t_cmd *cmd, t_data *data);
+void		do_redirections(t_cmd *cmd);
+void		active_heredoc(char *limiter);
 
 /* find_path.c */
 char		**parse_envp(char **envp);
 char		*get_full_path(char *dir, char *cmd);
 char		*check_path(int n, char **paths, char *cmd);
 bool		exists_n_executable(char *path);
-char		*find_cmd(t_cmd *cmd, char **envp);
+char		*find_cmd(t_cmd *cmd, char **envp, t_data *minishell);
 
 /* heredoc.c */
-int			fill_here_doc(t_cmd *cmd, const char *limiter, int write_fd);
-int			create_heredoc(t_cmd *cmd, const char *limiter);
+int			fill(t_cmd *cmd, const char *limiter, int write_fd, t_data *data);
+int			create_heredoc(t_cmd *cmd, const char *limiter, t_data *data);
+void		need_heredoc(t_cmd *cmd);
+void		consume_all_heredocs(t_cmd *cmd);
 
 /* pipeline_utils.c */
 bool		have_redirections(t_cmd *cmd);
-int			command_not_found(t_cmd *cmd);
+int			command_not_found(t_cmd *cmd, t_data *minishell);
 int			**pipe_error(int **pipe_fd, int nbr_pipes);
 
 /* close_all.c */
@@ -137,6 +157,7 @@ void		close_all_pipes(int **pipe_fd, int nbr_pipes, t_cmd *cmd);
 
 /* free_pipe.c */
 int			free_all_pipes(int **pipe_fd, int nbr_pipes);
+void		free_all_pipelines(t_pipe pipex, int nbr);
 
 /* pwd.c */
 void		ft_pwd(void);
@@ -176,7 +197,10 @@ void		set_envp_paths(t_env *env);
 char		*get_home_directory(t_env *env);
 char		*get_oldpwd_directory(t_env *env);
 char		*get_current_directory(void);
-bool		verif_dir(const char *home, const char *oldpwd, const char *current);
+bool		verif_dir(const char *home, const char *oldpwd, const char *curr);
+bool		verif_home_dir(t_env *env);
+bool		verif_oldpwd_dir(const char *oldpath);
+bool		verif_curr_dir(const char *curr);
 
 /* update_env.c */
 void		free_envp(char **envp);
@@ -197,21 +221,27 @@ int			is_pipe(char *line, t_token **tokens);
 int			is_cmd(char *line, t_token **tokens);
 int			count_cmd_data(t_data *data);
 t_token		*lexer(char *line);
-t_cmd		*build_cmd(t_token *tokens);
-char		*expand(char *str);
+t_cmd		*build_cmd(t_token *tokens, t_data *data);
+char		*expand(char *str, t_data *data);
 char		*remove_quotes(char *str, int *quote);
+int			get_var_len(char *str);
+int			expand_len(char *str, int *quote, t_env *env, int len);
+
+/* debug helpers */
+void		print_tokens(t_token *tokens);
 
 //cleanup
 void		free_tokens(t_token *tokens);
 void		free_cmds(t_cmd *cmds);
-void		cleanup_iteration(t_data *data);
+void		cleanup_iteration_n_line(t_data *data, char *line);
 
 //signals
 void		setup_prompt_signals(void);
 void		setup_heredoc_signals(void);
 void		setup_child_signals(void);
+void		put_signal(t_data *data);
 
-//utils
+//utils	
 void		free_envp(char **envp);
 char		**new_envp(t_env *env);
 int			get_env_size(t_env *env);
@@ -219,5 +249,21 @@ void		write_env_var(char *dest, t_export export, int key_len);
 int			count_cmd_data(t_data *data);
 void		cleanup_all(t_data *data);
 int			count_pipes(t_token *tokens);
+char		*get_env(t_env *env, const char *val);
+void		exit_error(int code, t_data *data);
+void		get_status(int pid, t_data *data);
+void		ft_fprintf(char *str1, char *mess, char *str2);
+void		free_data(t_data *data);
+bool		is_valid(char *cmd);
+void		free_tabl(char **tabl);
+int			is_redirection(char c);
+void		print_warning(const char *limiter);
+int			skip_quotes(const char *str, int i);
+
+/* lexer utils */
+int			skip_spaces(char *s, int i);
+int			skip_quoted(char *s, int i);
+int			skip_redirs(char *s, int i);
+int			skip_word(char *s, int i);
 
 #endif 

@@ -6,7 +6,7 @@
 /*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/11 09:15:46 by banne             #+#    #+#             */
-/*   Updated: 2025/12/11 13:55:30 by banne            ###   ########.fr       */
+/*   Updated: 2025/12/17 11:12:31 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,5 +55,6 @@ int	print_export(t_env *env)
 		printf("declare -x %s\n", envp_sorted[i]);
 		i++;
 	}
+	free_envp(envp_sorted);
 	return (0);
 }

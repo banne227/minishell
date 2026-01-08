@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lexer.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
+/*   By: jhauvill <jhauvill@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/04 15:00:01 by jhauvill          #+#    #+#             */
-/*   Updated: 2025/12/11 10:39:27 by banne            ###   ########.fr       */
+/*   Updated: 2026/01/07 16:45:40 by jhauvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 
 static int	count_args_cmd(char *cmd, int i)
 {
-	char	quote;
 	int		count;
 
 	count = 0;
@@ -26,15 +25,13 @@ static int	count_args_cmd(char *cmd, int i)
 			break ;
 		count++;
 		if (cmd[i] == '\'' || cmd[i] == '"')
-		{
-			quote = cmd[i++];
-			while (cmd[i] && cmd[i] != quote)
+			i = skip_quotes(cmd, i);
+		else if (is_redirection(cmd[i]))
+			while (is_redirection(cmd[i]))
 				i++;
-			if (cmd[i] == quote)
-				i++;
-		}
 		else
-			while (cmd[i] && !is_isspace(cmd[i]))
+			while (cmd[i] && !is_isspace(cmd[i])
+				&& cmd[i] != '\'' && cmd[i] != '"')
 				i++;
 	}
 	return (count);
@@ -42,30 +39,29 @@ static int	count_args_cmd(char *cmd, int i)
 
 static char	*get_array(char *cmd, int *i)
 {
-	char	quote;
 	int		start;
 	char	*res;
 
 	if (cmd[*i] == '\'' || cmd[*i] == '"')
 	{
-		quote = cmd[(*i)];
 		start = *i;
-		(*i)++;
-		while (cmd[*i] && cmd[*i] != quote)
-			(*i)++;
-		if (cmd[*i] == quote)
-			(*i)++;
+		*i = skip_quotes(cmd, *i);
 		res = ft_substr(cmd, start, *i - start);
-		if (cmd[*i] == quote)
-			(*i)++;
+		return (res);
+	}
+	else if (is_redirection(cmd[*i]))
+	{
+		start = *i;
+		*i = skip_redirs(cmd, *i);
+		res = ft_substr(cmd, start, *i - start);
 		return (res);
 	}
 	else
 	{
 		start = *i;
-		while (cmd[*i] && !is_isspace(cmd[*i]))
-			(*i)++;
-		return (ft_substr(cmd, start, *i - start));
+		*i = skip_word(cmd, *i);
+		res = ft_substr(cmd, start, *i - start);
+		return (res);
 	}
 }
 
@@ -77,6 +73,8 @@ static char	**parsing_cmd(char *cmd)
 	int		arg_idx;
 	int		start;
 
+	if (!is_valid(cmd))
+		return (NULL);
 	count = count_args_cmd(cmd, 0);
 	cmd_array = malloc(sizeof(char *) * (count + 1));
 	if (!cmd_array)
@@ -93,46 +91,53 @@ static char	**parsing_cmd(char *cmd)
 		cmd_array[arg_idx++] = get_array(cmd, &i);
 	}
 	cmd_array[arg_idx] = NULL;
-	i = 0;
-	//fprintf(stderr, "DEBUG parsing_cmd: ");
-	while (cmd_array[i])
-	{
-		fprintf(stderr, "[%s] ", cmd_array[i]);
-		i++;
-	}
-	fprintf(stderr, "\n");
 	return (cmd_array);
 }
 
-//static void	debug_tokens(t_token *tokens)
-//{
-//	while (tokens)
-//	{
-//		fprintf(stderr, "[%d:%s] ", tokens->type, tokens->str ? tokens->str : "NULL");
-//		tokens = tokens->next;
-//	}
-//	fprintf(stderr, "\n");
-//}
+static void	not_stored_token(t_token *tokens, char **tab)
+{
+	int		j;
+	bool	found;
+	t_token	*cur;
+
+	j = 0;
+	while (tab[j])
+	{
+		found = false;
+		cur = tokens;
+		while (cur)
+		{
+			if (cur->str == tab[j])
+			{
+				found = true;
+				break ;
+			}
+			cur = cur->next;
+		}
+		if (!found)
+			free(tab[j]);
+		j++;
+	}
+	free(tab);
+}
 
 t_token	*lexer(char *line)
 {
 	int		i;
 	t_token	*tokens;
 	char	**tab;
-	int		is_first_cmd;
 
 	tokens = NULL;
 	tab = parsing_cmd(line);
-	if (!tab)
+	if (!tab || tab == NULL)
 		return (NULL);
 	i = 0;
-	is_first_cmd = 1;
 	while (tab[i])
 	{
 		if (is_pipe(tab[i], &tokens))
 			i++;
-		else if (is_redir(tab[i], tab[i + 1], &tokens))
-			i+= 2;
+		else if (tab[i + 1] && is_redir(tab[i], tab[i + 1], &tokens))
+			i += 2;
 		else if (is_cmd(tab[i], &tokens))
 			i++;
 		else
@@ -141,6 +146,6 @@ t_token	*lexer(char *line)
 			i++;
 		}
 	}
-	free(tab);
+	not_stored_token(tokens, tab);
 	return (tokens);
 }

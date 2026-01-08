@@ -3,37 +3,43 @@
 /*                                                        :::      ::::::::   */
 /*   exec_single_cmd.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jhauvill <jhauvill@student.42.fr>          +#+  +:+       +#+        */
+/*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 11:33:50 by banne             #+#    #+#             */
-/*   Updated: 2025/12/09 14:03:55 by jhauvill         ###   ########.fr       */
+/*   Updated: 2025/12/22 16:55:18 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-void	exec_child(t_cmd *cmd, t_env *env, t_token *tokens)
+void	exec_child(t_cmd *cmd, t_data *data, t_token *tokens)
 {
-	setup_child_signals();
-	apply_redirections_to_cmd(cmd, tokens);
+	(void)tokens;
+	apply_redirections_to_cmd(cmd, data);
+	do_redirections(cmd);
 	if (cmd->error)
 		exit(1);
-	exec_single_cmd(cmd, env->envp);
+	exec_single_cmd(cmd, data->env->envp, data);
 }
 
-void	exec_single_cmd(t_cmd *cmd, char **envp)
+void	exec_single_cmd(t_cmd *cmd, char **envp, t_data *data)
 {
 	char	*path;
 
 	if (cmd->error)
 		exit(1);
-	path = find_cmd(cmd, envp);
+	path = find_cmd(cmd, envp, data);
 	if (!path)
+	{
+		ft_fprintf("minishell: ", cmd->args[0], ": command not found\n");
+		data->last_exit_status = 127;
 		exit(127);
+	}
 	if (execve(path, cmd->args, envp) == -1)
 	{
 		free(path);
 		put_error(cmd, "execution failed\n");
+		data->last_exit_status = 126;
 		exit(126);
 	}
 	free(path);
@@ -48,6 +54,8 @@ bool	is_builtin_child(t_cmd *cmd)
 	if (ft_strcmp(cmd->args[0], "pwd") == 0)
 		return (true);
 	if (ft_strcmp(cmd->args[0], "env") == 0)
+		return (true);
+	if (ft_strcmp(cmd->args[0], "exit") == 0)
 		return (true);
 	return (false);
 }

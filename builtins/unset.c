@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   unset.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
+/*   By: jhauvill <jhauvill@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 14:36:42 by banne             #+#    #+#             */
-/*   Updated: 2025/12/09 12:48:30 by banne            ###   ########.fr       */
+/*   Updated: 2025/12/19 14:33:40 by jhauvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ bool	env_exist(t_env *env, char *arg)
 	int	len;
 
 	i = 0;
-	len = strlen(arg);
+	len = ft_strlen(arg);
 	while (env->envp[i])
 	{
 		if (ft_strncmp(env->envp[i], arg, len) == 0 && env->envp[i][len] == '=')

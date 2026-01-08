@@ -6,11 +6,35 @@
 /*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 17:45:00 by banne             #+#    #+#             */
-/*   Updated: 2025/12/11 13:42:31 by banne            ###   ########.fr       */
+/*   Updated: 2025/12/15 12:45:32 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
+
+char	*get_env(t_env *env, const char *val)
+{
+	int		i;
+	size_t	len;
+	char	*result;
+
+	result = NULL;
+	if (!env || !env->envp || !val)
+		return (ft_strdup(""));
+	len = ft_strlen(val);
+	i = 0;
+	while (env->envp[i])
+	{
+		if (ft_strncmp(env->envp[i], val, len) == 0
+			&& env->envp[i][len] == '=')
+		{
+			result = env->envp[i] + len + 1;
+			return (ft_strdup(result));
+		}
+		i++;
+	}
+	return (ft_strdup(""));
+}
 
 char	**free_env(char **envp, int i)
 {

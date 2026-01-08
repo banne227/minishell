@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   init_utils.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
+/*   By: jhauvill <jhauvill@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 14:00:39 by banne             #+#    #+#             */
-/*   Updated: 2025/12/11 13:57:52 by banne            ###   ########.fr       */
+/*   Updated: 2025/12/19 11:00:13 by jhauvill         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@ int	count_cmd_data(t_data *data)
 	t_cmd	*tmp;
 
 	count = 0;
+	if (!data || !data->cmds)
+		return (0);
 	tmp = data->cmds;
 	while (tmp)
 	{
@@ -39,4 +41,11 @@ int	count_pipes(t_token *tokens)
 		tokens = tokens->next;
 	}
 	return (count);
+}
+
+int	put_error(t_cmd *cmd, const char *msg)
+{
+	cmd->error = true;
+	ft_fprintf("minishell: ", (char *)msg, "\n");
+	return (-1);
 }
