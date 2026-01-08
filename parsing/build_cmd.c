@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   build_cmd.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jhauvill <jhauvill@student.42.fr>          +#+  +:+       +#+        */
+/*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 11:19:19 by jhauvill          #+#    #+#             */
-/*   Updated: 2026/01/07 16:48:46 by jhauvill         ###   ########.fr       */
+/*   Updated: 2026/01/08 14:38:28 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,11 +52,18 @@ static void	add_redir_token(t_cmd *cmd, t_token *token)
 {
 	t_token	*new_redir;
 	t_token	*current;
+	char	*str_no_quotes;
 
 	new_redir = malloc(sizeof(t_token));
 	if (!new_redir)
 		return ;
-	new_redir->str = token->str;
+	if (token->str[0] == '\'' || token->str[0] == '"')
+	{
+		str_no_quotes = rmv_redir_quotes(token->str);
+		new_redir->str = str_no_quotes;
+	}
+	else
+		new_redir->str = token->str;
 	new_redir->type = token->type;
 	new_redir->next = NULL;
 	if (!cmd->redir)
@@ -103,7 +110,7 @@ t_cmd	*build_cmd(t_token *tokens, t_data *data)
 	{
 		cmd = build_cmd2(tokens, cmd, &i);
 		if (!cmd)
-			return (ft_putstr_fd(
+			return (data->last_exit_status = 2, ft_putstr_fd(
 					"syntax error near unexpected token `|'\n", 2), NULL);
 		if (tokens->type == T_CMD || tokens->type == T_ARG)
 		{

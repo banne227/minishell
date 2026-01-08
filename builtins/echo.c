@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   echo.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jhauvill <jhauvill@student.42.fr>          +#+  +:+       +#+        */
+/*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 14:36:30 by banne             #+#    #+#             */
-/*   Updated: 2025/12/18 18:58:38 by jhauvill         ###   ########.fr       */
+/*   Updated: 2026/01/08 15:02:07 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ static void	print_echo_args(char **args, int start_index)
 		ft_print(args[i]);
 }
 
-void	ft_echo(char **args)
+void	ft_echo(t_cmd *cmd)
 {
 	int	i;
 	int	need_newline;
@@ -57,12 +57,14 @@ void	ft_echo(char **args)
 
 	i = 1;
 	need_newline = 1;
-	while (args[i] && args[i][0] == '-' && args[i][1] == 'n')
+	if (!cmd || !cmd->args || cmd->outfile == -1)
+		return ;
+	while (cmd->args[i] && cmd->args[i][0] == '-' && cmd->args[i][1] == 'n')
 	{
 		j = 2;
-		while (args[i][j] == 'n')
+		while (cmd->args[i][j] == 'n')
 			j++;
-		if (args[i][j] == '\0')
+		if (cmd->args[i][j] == '\0')
 		{
 			need_newline = 0;
 			i += 1;
@@ -70,6 +72,6 @@ void	ft_echo(char **args)
 		else
 			break ;
 	}
-	print_echo_args(args, i);
+	print_echo_args(cmd->args, i);
 	new_line(need_newline);
 }

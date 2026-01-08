@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   quotes.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jhauvill <jhauvill@student.42.fr>          +#+  +:+       +#+        */
+/*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/10 11:52:55 by jhauvill          #+#    #+#             */
-/*   Updated: 2026/01/07 16:21:36 by jhauvill         ###   ########.fr       */
+/*   Updated: 2026/01/08 14:15:15 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,28 @@ char	*remove_quotes(char *str, int *quote)
 			if (quote_char == '\'')
 				*quote = 1;
 		}
+		else if (str[i] == quote_char)
+			quote_char = 0;
+		else
+			count++;
+		i++;
+	}
+	return (char_without_quotes(str, quote_char, count));
+}
+
+char	*rmv_redir_quotes(char *str)
+{
+	int		i;
+	int		count;
+	char	quote_char;
+
+	i = 0;
+	count = 0;
+	quote_char = 0;
+	while (str[i])
+	{
+		if ((str[i] == '"' || str[i] == '\'') && !quote_char)
+			quote_char = str[i];
 		else if (str[i] == quote_char)
 			quote_char = 0;
 		else

@@ -6,7 +6,7 @@
 /*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/22 16:56:28 by banne             #+#    #+#             */
-/*   Updated: 2025/12/22 16:56:36 by banne            ###   ########.fr       */
+/*   Updated: 2026/01/08 15:31:26 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ void	find_limiter_and_active_heredoc(t_cmd *cmd)
 	t_token	*current;
 	char	*limiter;
 
+	limiter = NULL;
 	current = cmd->redir;
 	while (current)
 	{
@@ -24,7 +25,8 @@ void	find_limiter_and_active_heredoc(t_cmd *cmd)
 			limiter = current->str;
 		current = current->next;
 	}
-	active_heredoc(limiter);
+	if (limiter)
+		active_heredoc(limiter);
 }
 
 void	need_heredoc(t_cmd *cmd)
@@ -42,10 +44,6 @@ void	need_heredoc(t_cmd *cmd)
 	}
 	if (found > 0)
 		find_limiter_and_active_heredoc(cmd);
-	else if (!found && cmd->args && cmd->args[0])
-		ft_fprintf("minishell: ", cmd->args[0], ": command not found\n");
-	else if (!found)
-		ft_putstr_fd("minishell : Invalid syntax\n", 2);
 	return ;
 }
 

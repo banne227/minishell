@@ -29,3 +29,12 @@
     fun:malloc
     fun:main
 }
+{
+    readline_bracketed_paste
+    Memcheck:Leak
+    match-leak-kinds: reachable
+    fun:realloc
+    fun:rl_extend_line_buffer
+    fun:rl_insert_text
+    fun:rl_bracketed_paste_begin
+}

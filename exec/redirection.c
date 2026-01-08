@@ -6,7 +6,7 @@
 /*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 11:34:05 by banne             #+#    #+#             */
-/*   Updated: 2025/12/15 12:38:18 by banne            ###   ########.fr       */
+/*   Updated: 2026/01/08 14:54:20 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 int	open_input_file(t_cmd *cmd, const char *file)
 {
-	if (cmd->infile != STDIN_FILENO)
+	if (cmd->infile != STDIN_FILENO && cmd->infile != -1)
 		close(cmd->infile);
 	cmd->infile = open(file, O_RDONLY);
 	if (cmd->infile < 0)
@@ -24,7 +24,7 @@ int	open_input_file(t_cmd *cmd, const char *file)
 
 int	open_output_trunc(t_cmd *cmd, const char *file)
 {
-	if (cmd->outfile != STDOUT_FILENO)
+	if (cmd->outfile != STDOUT_FILENO && cmd->outfile != -1)
 		close(cmd->outfile);
 	cmd->outfile = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (cmd->outfile < 0)
@@ -34,7 +34,7 @@ int	open_output_trunc(t_cmd *cmd, const char *file)
 
 int	open_output_append(t_cmd *cmd, const char *file)
 {
-	if (cmd->outfile != STDOUT_FILENO)
+	if (cmd->outfile != STDOUT_FILENO && cmd->outfile != -1)
 		close(cmd->outfile);
 	cmd->outfile = open(file, O_WRONLY | O_CREAT | O_APPEND, 0644);
 	if (cmd->outfile < 0)
@@ -44,7 +44,7 @@ int	open_output_append(t_cmd *cmd, const char *file)
 
 void	do_redirections(t_cmd *cmd)
 {
-	if (cmd->infile != STDIN_FILENO)
+	if (cmd->infile != STDIN_FILENO && cmd->infile != -1)
 	{
 		if (dup2(cmd->infile, STDIN_FILENO) == -1)
 		{
@@ -54,7 +54,7 @@ void	do_redirections(t_cmd *cmd)
 		close(cmd->infile);
 		cmd->infile = STDIN_FILENO;
 	}
-	if (cmd->outfile != STDOUT_FILENO)
+	if (cmd->outfile != STDOUT_FILENO && cmd->outfile != -1)
 	{
 		if (dup2(cmd->outfile, STDOUT_FILENO) == -1)
 		{

@@ -6,7 +6,7 @@
 /*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 11:11:35 by jhauvill          #+#    #+#             */
-/*   Updated: 2026/01/08 10:53:34 by banne            ###   ########.fr       */
+/*   Updated: 2026/01/08 17:07:40 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,7 +163,7 @@ void		free_all_pipelines(t_pipe pipex, int nbr);
 void		ft_pwd(void);
 
 /* echo.c */
-void		ft_echo(char **args);
+void		ft_echo(t_cmd *cmd);
 
 /* env.c */
 int			ft_env(char **args, char **envp);
@@ -224,6 +224,7 @@ t_token		*lexer(char *line);
 t_cmd		*build_cmd(t_token *tokens, t_data *data);
 char		*expand(char *str, t_data *data);
 char		*remove_quotes(char *str, int *quote);
+char		*rmv_redir_quotes(char *str);
 int			get_var_len(char *str);
 int			expand_len(char *str, int *quote, t_env *env, int len);
 
@@ -259,6 +260,8 @@ void		free_tabl(char **tabl);
 int			is_redirection(char c);
 void		print_warning(const char *limiter);
 int			skip_quotes(const char *str, int i);
+void		print_cmd_error(t_cmd *cmd, t_data *data);
+void		put_void(void);
 
 /* lexer utils */
 int			skip_spaces(char *s, int i);

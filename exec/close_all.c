@@ -6,7 +6,7 @@
 /*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 13:59:17 by banne             #+#    #+#             */
-/*   Updated: 2025/12/09 12:34:47 by banne            ###   ########.fr       */
+/*   Updated: 2026/01/08 14:52:36 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,9 +16,9 @@ void	close_fds(t_cmd *cmd)
 {
 	if (!cmd)
 		return ;
-	if (cmd->infile != STDIN_FILENO)
+	if (cmd->infile != STDIN_FILENO && cmd->infile != -1)
 		close(cmd->infile);
-	if (cmd->outfile != STDOUT_FILENO)
+	if (cmd->outfile != STDOUT_FILENO && cmd->outfile != -1)
 		close(cmd->outfile);
 }
 
@@ -31,9 +31,9 @@ void	close_pipes_fds(int **pipe_fd, int nbr_pipes)
 	{
 		if (pipe_fd[i])
 		{
-			if (pipe_fd[i][0] >= 0)
+			if (pipe_fd[i][0] >= 0 && pipe_fd[i][0] != -1)
 				close(pipe_fd[i][0]);
-			if (pipe_fd[i][1] >= 0)
+			if (pipe_fd[i][1] >= 0 && pipe_fd[i][1] != -1)
 				close(pipe_fd[i][1]);
 		}
 		i++;

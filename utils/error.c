@@ -6,7 +6,7 @@
 /*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/15 15:15:13 by banne             #+#    #+#             */
-/*   Updated: 2026/01/08 10:41:00 by banne            ###   ########.fr       */
+/*   Updated: 2026/01/08 15:34:10 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,4 +72,23 @@ bool	is_valid(char *cmd)
 		ft_putstr_fd("'\n", 2);
 	}
 	return (valid);
+}
+
+void	print_cmd_error(t_cmd *cmd, t_data *data)
+{
+	if (!cmd || !cmd->args || !cmd->args[0])
+	{
+		data->last_exit_status = 127;
+		return ;
+	}
+	if (ft_strchr(cmd->args[0], '/') && access(cmd->args[0], F_OK) == 0)
+	{
+		ft_fprintf("minishell: ", cmd->args[0], ":Permission denied\n");
+		data->last_exit_status = 126;
+	}
+	else
+	{
+		ft_fprintf("minishell: ", cmd->args[0], ":command not found\n");
+		data->last_exit_status = 127;
+	}
 }

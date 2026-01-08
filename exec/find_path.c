@@ -79,12 +79,8 @@ bool	exists_n_executable(char *path)
 		if (access(path, X_OK) == 0)
 			return (true);
 		else
-		{
-			ft_fprintf("minishell: ", path, ": Permission denied\n");
 			return (false);
-		}
 	}
-	ft_fprintf("minishell: ", path, ": No such file or directory\n");
 	return (false);
 }
 

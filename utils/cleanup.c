@@ -6,7 +6,7 @@
 /*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/09 16:40:00 by banne             #+#    #+#             */
-/*   Updated: 2025/12/22 12:22:58 by banne            ###   ########.fr       */
+/*   Updated: 2026/01/08 15:04:47 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,9 +61,9 @@ void	free_cmds(t_cmd *cmds)
 		}
 		if (current->redir)
 			free_redir_tokens(current->redir);
-		if (current->infile != STDIN_FILENO)
+		if (current->infile != STDIN_FILENO && current->infile != -1)
 			close(current->infile);
-		if (current->outfile != STDOUT_FILENO)
+		if (current->outfile != STDOUT_FILENO && current->outfile != -1)
 			close(current->outfile);
 		free(current);
 		current = next;

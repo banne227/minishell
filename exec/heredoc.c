@@ -6,7 +6,7 @@
 /*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 11:34:03 by banne             #+#    #+#             */
-/*   Updated: 2025/12/22 16:56:58 by banne            ###   ########.fr       */
+/*   Updated: 2026/01/08 14:53:01 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ int	create_heredoc(t_cmd *cmd, const char *limiter, t_data *data)
 	pid_t	pid;
 
 	setup_heredoc_signals();
-	if (cmd->infile != STDIN_FILENO)
+	if (cmd->infile != STDIN_FILENO && cmd->infile != -1)
 		close(cmd->infile);
 	if (pipe(hd) == -1)
 		return (put_error(cmd, "Failed to create heredoc pipe\n"));

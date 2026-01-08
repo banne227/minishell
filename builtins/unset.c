@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   unset.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jhauvill <jhauvill@student.42.fr>          +#+  +:+       +#+        */
+/*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 14:36:42 by banne             #+#    #+#             */
-/*   Updated: 2025/12/19 14:33:40 by jhauvill         ###   ########.fr       */
+/*   Updated: 2026/01/08 15:40:40 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,8 @@ void	ft_unset(char **args, t_env *env)
 	i = 1;
 	while (args[i])
 	{
-		if (is_valid_identifier(args[i]) && env_exist(env, args[i]))
+		if (is_valid_identifier(args[i]) && env_exist(env, args[i])
+			&& args[i][0] != '_')
 		{
 			to_remove.key = args[i];
 			to_remove.value = NULL;

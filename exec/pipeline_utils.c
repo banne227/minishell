@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipeline_utils.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jhauvill <jhauvill@student.42.fr>          +#+  +:+       +#+        */
+/*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 13:29:28 by banne             #+#    #+#             */
-/*   Updated: 2025/12/18 18:57:21 by jhauvill         ###   ########.fr       */
+/*   Updated: 2026/01/08 14:53:23 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,9 +26,9 @@ int	command_not_found(t_cmd *cmd, t_data *minishell)
 	minishell->last_exit_status = 127;
 	ft_fprintf("minishell: ", cmd->args[0], ": command not found\n");
 	cmd->error = true;
-	if (cmd->infile != STDIN_FILENO)
+	if (cmd->infile != STDIN_FILENO && cmd->infile != -1)
 		close(cmd->infile);
-	if (cmd->outfile != STDOUT_FILENO)
+	if (cmd->outfile != STDOUT_FILENO && cmd->outfile != -1)
 		close(cmd->outfile);
 	return (127);
 }

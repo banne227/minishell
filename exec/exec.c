@@ -6,7 +6,7 @@
 /*   By: banne <banne@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/05 11:33:53 by banne             #+#    #+#             */
-/*   Updated: 2026/01/08 10:44:02 by banne            ###   ########.fr       */
+/*   Updated: 2026/01/08 15:43:32 by banne            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ void	run_builtin(t_cmd *cmd, t_env *env, t_data *data)
 	apply_redirections_to_cmd(cmd, data);
 	do_redirections(cmd);
 	if (ft_strcmp(cmd->args[0], "cd") == 0)
-		ft_cd(cmd->args, env);
+		data->last_exit_status = ft_cd(cmd->args, env);
 	else if (ft_strcmp(cmd->args[0], "export") == 0)
 		ft_export(cmd->args, env);
 	else if (ft_strcmp(cmd->args[0], "unset") == 0)
@@ -55,7 +55,7 @@ void	run_builtin(t_cmd *cmd, t_env *env, t_data *data)
 	else if (ft_strcmp(cmd->args[0], "pwd") == 0)
 		ft_pwd();
 	else if (ft_strcmp(cmd->args[0], "echo") == 0)
-		ft_echo(cmd->args);
+		ft_echo(cmd);
 	dup2(saved_stdin, STDIN_FILENO);
 	dup2(saved_stdout, STDOUT_FILENO);
 	close(saved_stdin);
@@ -77,7 +77,7 @@ bool	verify_cmd(t_cmd *cmd, t_data *data)
 		path = find_cmd(cmd, data->env->envp, data);
 		if (!path && is_builtin(cmd) == false)
 		{
-			data->last_exit_status = 127;
+			print_cmd_error(cmd, data);
 			valid = false;
 			break ;
 		}
@@ -92,10 +92,12 @@ bool	verify_cmd(t_cmd *cmd, t_data *data)
 void	exec_cmd(t_data *data)
 {
 	pid_t	pid;
-	bool	valid;
 
-	valid = verify_cmd(data->cmds, data);
-	if (!data->cmds || !data->cmds->args[0] || !valid)
+	if (!data->cmds)
+		return (data->last_exit_status = 2, put_void());
+	if (!verify_cmd(data->cmds, data))
+		return ;
+	if (!data->cmds->args[0])
 		return ;
 	if (count_pipes(data->tokens) > 0)
 		return (exec_pipeline(data->cmds, data->env, data->tokens, data));
@@ -104,10 +106,7 @@ void	exec_cmd(t_data *data)
 	signal(SIGINT, SIG_IGN);
 	pid = fork();
 	if (pid < 0)
-	{
-		perror("fork");
 		exit_error(1, data);
-	}
 	if (pid == 0)
 	{
 		setup_child_signals();
